@@ -7,12 +7,12 @@ Gem::Specification.new do |spec|
   spec.email         = ["davec@naildrivin5.com"]
 
   spec.summary       = %q{Assert that the conditions of your test are correct before testing}
-  #spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.homepage      = "https://sustainable-rails.com"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
 
-  #spec.metadata["homepage_uri"] = spec.homepage
-  #spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
-  #spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = "https://github.com/sustainable-rails/confidence-check"
+  spec.metadata["changelog_uri"] = "https://github.com/sustainable-rails/confidence-check/releases"
 
   spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
     `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
