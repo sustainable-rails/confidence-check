@@ -1,17 +1,42 @@
-# confidence\_check - make sure your test setup didn't break before running tests
+# confidence\_check - Get confidence in your test setup
 
 Sometimes tests have some setup required before you run the test, and sometimes that setup is complicated, and sometimes that
 setup can break if other parts of the system aren't working.  When that happens, you can a test failure that doesn't mean your
 code is broken, just that some other code is broken.
 
-Developers typically use three techniques to deal with this, none of them very good:
+```ruby
+visit "/"
+click_on "sign_up"
 
-* Use the same assertions you use for tests
-* Use `if` statements and explicitly fail
-* Ignore this problem and hope it goes away
+fill_in :username, with: "davetron5000"
+expect {
+  click_on "Create an Account"
+}.to change {
+  Account.count
+}.by(1)
+```
 
-`confidence_check` allows you to validate the potentially complex conditions under which your test should be run to allow you to
-focus on only what is wrong.
+What if the `sign_up` link is broken, but your account registration code is working perfectly?  You'll get a test failure on
+that call to `fill_in`.  This is confusing.
+
+```ruby
+confidence_check do
+  visit "/"
+  click_on "sign_up"
+end
+
+fill_in :username, with: "davetron5000"
+expect {
+  click_on "Create an Account"
+}.to change {
+  Account.count
+}.by(1)
+```
+
+Now, if something goes wrong getting to the page, i.e. setting up for your test, you'll get a different error: CONFIDENCE CHECK
+FAILED.
+
+This can help tremendously with isolating the root cause of a test failure.  Instead of digging into the code you are testing, you can quickly see that some *other* code that is needed just to run a test is broken.
 
 ## Install
 
@@ -25,7 +50,7 @@ Or, if using a `Gemfile`:
 gem "confidence-check"
 ```
 
-## Use - RSpec
+### Setup - RSpec
 
 1. Include `ConfidenceCheck::ForRSpec` in your test. The most common way is in your `spec_helper.rb`:
 
@@ -53,7 +78,7 @@ gem "confidence-check"
    end
    ```
 
-## Use - Minitest
+## Setup - Minitest
 
 1. Include `ConfidenceCheck::ForMinitest` in your test.  For Rails, you'd include this in `ActiveSupport::TestCase`:
 
@@ -83,13 +108,41 @@ gem "confidence-check"
    end
    ```
 
-## Use - with Capybara
+### Setup - Custom
 
-A handy use for confidence checks is when navigating a web page with Capybara. You must often perform several steps to get to
-the page where you will the assert.  If you use the `*WithCapybara` versions of the modules, you can wrap your Capybara
-navigation commands in a `confidence_check`:
+1. The module `ConfidenceCheck::CheckMethod` makes a call to `exception_klasses`, which returns an array of exception classes you want to rescue inside a `confidence_check` call.  You'll need to implement this yourself:
 
-### RSpec
+   ```ruby
+   module MyCustomConfidenceCheck
+     include ConfidenceCheck::CheckMethod
+     def exception_klasses
+       [ MyCustomError ]
+     end
+   end
+   ```
+2. Note that you can include any of the other modules as a base. For example, if you want to use RSpec but add your own
+   additional method:
+   ```ruby
+   module MyCustomConfidenceCheck
+     include ConfidenceCheck::ForRSpec
+     include ConfidenceCheck::CheckMethod
+     def exception_klasses
+       super + [ MyCustomError ]
+     end
+   end
+   ```
+3. Now, you need to include this module in your tests.  HOw to do this dependson how you are writing tests, but hopefully it's
+   as simple as `include MyCustomConfidenceCheck`
+
+### Setup - with Capybara
+
+Capybara raises several exceptions if navigation or page manipulation fails.  These are almost always the types of failures
+a confidence check should notify you about because they usually mean a page or pages aren't even working enough for you to
+execute a test.
+
+If you use the `*WithCapybara` versions of the modules, you can wrap your Capybara navigation commands in a `confidence_check`:
+
+#### RSpec
 
 ```ruby
 RSpec.configure do |c|
@@ -97,7 +150,7 @@ RSpec.configure do |c|
 end
 ```
 
-### Minitest
+#### Minitest
 
 ```ruby
 # test/test_helper.rb
@@ -109,50 +162,29 @@ class ActiveSupport::TestCase
 end
 ```
 
-## A Longer Example
-
-A more realistic example is when testing something moderately complex like an integration or system test.
-
-Suppose we have a web page that asks if you are 18 years old or not.  Suppose that this is the second webpage in a series, thus
-the happy path is to visit the home page, click a link, at which point you are asked your age:
+#### Custom
 
 ```ruby
-visit "/"
-
-click_on "Get Started"
-
-click_on "18 or Over"
-expect(page).to have_content("Great, you can use our service!")
-```
-
-Suppose that the "Get Started" link is changed to go somewhere else.  This test will break not with a failed assertion, but
-because `click_on "18 or Over"` won't be there.  We could check for this like so:
-
-```ruby
-visit "/"
-
-click_on "Get Started"
-expect(page).to have_content("You must be 18 to use this service")
-
-click_on "18 or Over"
-expect(page).to have_content("Great, you can use our service!")
-```
-
-Now, the first `expect` will fail, which is better, but is it?  What are we testing here? We aren't *really* testing the
-navigation from the home page, just the age check.  We can indicate this with `confidence_check`:
-
-```
-confidence_check do
-  visit "/"
-
-  click_on "Get Started"
-  expect(page).to have_content("You must be 18 to use this service")
+module MyCustomConfidenceCheck
+  include ConfidenceCheck::CheckMethod
+  def exception_klasses
+    [ MyCustomError, Capybara::CapybaraError ]
+  end
 end
 
-click_on "18 or Over"
-expect(page).to have_content("Great, you can use our service!")
+# OR, to e.g. re-use RSpec's
+
+module MyCustomConfidenceCheck
+  include ConfidenceCheck::ForRSpec::WithCapybara
+  include ConfidenceCheck::CheckMethod
+  def exception_klasses
+    super + [ MyCustomError ]
+  end
+end
 ```
 
-Now, if `visit`, `click_on`, or `expect` fail, the failure message will indicate "CONFIDENCE CHECK FAILED" and this indicates
-that the code you are testing is not necessarily broken, but that some other dependent code is broken, so there's no sense
-actually running the test until that gets fixed.
+## Developing
+
+* Set up with `bin/setup`
+* Run tests with `bin/rspec` or `bin/rake`
+
