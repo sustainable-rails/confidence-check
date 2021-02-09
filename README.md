@@ -25,47 +25,91 @@ Or, if using a `Gemfile`:
 gem "confidence-check"
 ```
 
-## Use
+## Use - RSpec
+
+1. Include `ConfidenceCheck::ForRSpec` in your test. The most common way is in your `spec_helper.rb`:
+
+   ```ruby
+   RSpec.configure do |c|
+     c.include ConfidenceCheck::ForRSpec
+   end
+   ```
+2. You can now call `confidence_check` anywhere you need to assert your test is set up:
+
+   ```ruby
+   RSpec.describe Person do
+     include ConfidenceCheck
+     describe "#age" do
+       it "is based on birthdate" do
+         person = create(:person)
+
+         confidence_check do
+           expect(person.birthdate).not_to be_nil
+         end
+
+         expect(person.age).to eq(47)
+       end
+     end
+   end
+   ```
+
+## Use - Minitest
+
+1. Include `ConfidenceCheck::ForMinitest` in your test.  For Rails, you'd include this in `ActiveSupport::TestCase`:
+
+   ```ruby
+   # test/test_helper.rb
+
+   class ActiveSupport::TestCase
+     include ConfidenceCheck::ForMinitest
+
+     # ...
+   end
+   ```
+2. You can now call `confidence_check` anywhere you need to assert your test is set up:
+
+   ```ruby
+   class PersonTest < MiniTest::Test
+     include ConfidenceCheck
+     def test_age
+       person = create(:person)
+
+       confidence_check do
+         refute_nil person.birthdate
+       end
+
+       assert_equal 47,person.age
+     end
+   end
+   ```
+
+## Use - with Capybara
+
+A handy use for confidence checks is when navigating a web page with Capybara. You must often perform several steps to get to
+the page where you will the assert.  If you use the `*WithCapybara` versions of the modules, you can wrap your Capybara
+navigation commands in a `confidence_check`:
+
+### RSpec
 
 ```ruby
-require "confidence-check"
-
-class PersonTest < MiniTest::Test
-  include ConfidenceCheck
-  def test_age
-    person = create(:person)
-
-    confidence_check do
-      refute_nil person.birthdate
-    end
-
-    assert_equal 47,person.age
-  end
-end
-
-# Works with RSpec, too
-require "confidence-check"
-
-RSpec.describe Person do
-  include ConfidenceCheck
-  describe "#age" do
-    it "is based on birthdate" do
-      person = create(:person)
-
-      confidence_check do
-        expect(person.birthdate).not_to be_nil
-      end
-
-      expect(person.age).to eq(47)
-    end
-  end
+RSpec.configure do |c|
+  c.include ConfidenceCheck::ForRSpec::WithCapybara
 end
 ```
 
-This gives you *confidence* that the results of `create(:person)` had a value you expected for `birthdate`.  This is a contrived
-example.
+### Minitest
 
-### A Better Example
+```ruby
+# test/test_helper.rb
+
+class ActiveSupport::TestCase
+  include ConfidenceCheck::ForMinitest::WithCapybara
+
+  # ...
+end
+```
+
+## A Longer Example
 
 A more realistic example is when testing something moderately complex like an integration or system test.
 

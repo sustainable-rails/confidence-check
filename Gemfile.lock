@@ -19,6 +19,7 @@ GEM
     diff-lcs (1.4.4)
     mini_mime (1.0.2)
     mini_portile2 (2.5.0)
+    minitest (5.14.3)
     nokogiri (1.11.1)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
@@ -51,6 +52,7 @@ PLATFORMS
 DEPENDENCIES
   capybara
   confidence-check!
+  minitest
   rake (~> 12.0)
   rspec
 
