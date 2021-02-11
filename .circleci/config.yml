@@ -14,8 +14,9 @@ jobs:                # keyword
       - ruby/install:                            # ruby/ is from the orb name, install is a command in that orb
           version: << parameters.ruby-version >> # magic nonsense for param subst
       - ruby/install-deps                        # another command from the ruby orb
-      - run:                                     # keyword
-          command: bin/rspec
+      - ruby/rspec-test                          # another command from the ruby orb
+                                                 # this one will sort out the results.xml file
+                                                 # and all that other nonsense.
 workflows:              # keyword
   all-rubies:           # my name for the workflow
     jobs:               # keyword
