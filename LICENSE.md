@@ -1,4 +1,4 @@
-[SOFTWARE NAME] Copyright (YEAR) (COPYRIGHT HOLDER(S)/AUTHOR(S))(“Licensor”)
+[confidence-check] Copyright (2021) (David Copeland)(“Licensor”)
 
 Hippocratic License Version Number: 2.1.
 
