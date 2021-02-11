@@ -1,5 +1,7 @@
 # confidence\_check - Get confidence in your test setup
 
+[![<sustainable-rails>](https://circleci.com/gh/sustainable-rails/confidence-check.svg?style=shield)](https://app.circleci.com/pipelines/github/sustainable-rails/confidence-check)
+
 Sometimes tests have some setup required before you run the test, and sometimes that setup is complicated, and sometimes that
 setup can break if other parts of the system aren't working.  When that happens, you can a test failure that doesn't mean your
 code is broken, just that some other code is broken.
