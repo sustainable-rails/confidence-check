@@ -57,6 +57,7 @@ gem "confidence-check"
 1. Include `ConfidenceCheck::ForRSpec` in your test. The most common way is in your `spec_helper.rb`:
 
    ```ruby
+   require "confidence_check/for_rspec"
    RSpec.configure do |c|
      c.include ConfidenceCheck::ForRSpec
    end
@@ -86,6 +87,7 @@ gem "confidence-check"
 
    ```ruby
    # test/test_helper.rb
+   require "confidence_check/for_minitest"
 
    class ActiveSupport::TestCase
      include ConfidenceCheck::ForMinitest
@@ -115,6 +117,7 @@ gem "confidence-check"
 1. The module `ConfidenceCheck::CheckMethod` makes a call to `exception_klasses`, which returns an array of exception classes you want to rescue inside a `confidence_check` call.  You'll need to implement this yourself:
 
    ```ruby
+   require "confidence_check/check_method"
    module MyCustomConfidenceCheck
      include ConfidenceCheck::CheckMethod
      def exception_klasses
@@ -147,6 +150,7 @@ If you use the `*WithCapybara` versions of the modules, you can wrap your Capyba
 #### RSpec
 
 ```ruby
+require "confidence_check/for_rspec"
 RSpec.configure do |c|
   c.include ConfidenceCheck::ForRSpec::WithCapybara
 end
@@ -156,6 +160,7 @@ end
 
 ```ruby
 # test/test_helper.rb
+require "confidence_check/for_minitest"
 
 class ActiveSupport::TestCase
   include ConfidenceCheck::ForMinitest::WithCapybara
@@ -167,6 +172,7 @@ end
 #### Custom
 
 ```ruby
+require "confidence_check/check_method"
 module MyCustomConfidenceCheck
   include ConfidenceCheck::CheckMethod
   def exception_klasses
@@ -176,6 +182,7 @@ end
 
 # OR, to e.g. re-use RSpec's
 
+require "confidence_check/for_rspec"
 module MyCustomConfidenceCheck
   include ConfidenceCheck::ForRSpec::WithCapybara
   include ConfidenceCheck::CheckMethod
@@ -188,5 +195,5 @@ end
 ## Developing
 
 * Set up with `bin/setup`
-* Run tests with `bin/rspec` or `bin/rake`
+* Run tests with `bin/ci`
 
