@@ -15,11 +15,14 @@ jobs:                # keyword
           version: << parameters.ruby-version >> # magic nonsense for param subst
       - ruby/install-deps                        # another command from the ruby orb
       - run:
-          command: bin/ci /tmp/rspec_results.xml
+          name: "Create the test results directory because you can't just store_test_results with a file and if you do you do not get any sort of error because wtf is with this platform?"
+          command: mkdir -p /tmp/test-results
+      - run:
+          command: bin/ci /tmp/test-results/rspec_results.xml
       - store_test_results:                      # store_test_results is magic from circle
-          path: /tmp/rspec_results.xml           # path is the param to store_test_results
+          path: /tmp/test-results                # path is a param to store_test_results and it must be a directory not a file
       - store_artifacts:                         # store_artifacts is magic from circle
-          path: /tmp/rspec_results.xml           # path is the param to store_artifacts
+          path: /tmp/test-results                # path is the param to store_artifacts
 workflows:              # keyword
   all-rubies:           # my name for the workflow
     jobs:               # keyword
