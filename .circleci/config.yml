@@ -16,9 +16,9 @@ jobs:                # keyword
       - ruby/install-deps                        # another command from the ruby orb
       - run:
           command: bin/ci /tmp/rspec_results.xml
-      - store_test_results                       # store_test_results is magic from circle
+      - store_test_results:                      # store_test_results is magic from circle
           path: /tmp/rspec_results.xml           # path is the param to store_test_results
-      - store_artifacts                          # store_artifacts is magic from circle
+      - store_artifacts:                         # store_artifacts is magic from circle
           path: /tmp/rspec_results.xml           # path is the param to store_artifacts
 workflows:              # keyword
   all-rubies:           # my name for the workflow
